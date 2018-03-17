@@ -1,0 +1,7 @@
+__pycache__
+*.swp
+*.egg-info
+/.vscode
+/docs/build
+/build
+/dist

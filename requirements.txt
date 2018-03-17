@@ -1,0 +1,5 @@
+requests
+furl
+ansicolors
+beautifulsoup4
+pyotp
