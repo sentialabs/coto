@@ -1,7 +1,8 @@
 import json
+from . import BaseClient
 
 
-class Billing:
+class Client(BaseClient):
     """
     A low-level client representing Biling:
 
@@ -14,20 +15,32 @@ class Billing:
 
     These are the available methods:
 
-    * :py:meth:`delete_tax_registration`
-    * :py:meth:`list_alternate_contacts`
-    * :py:meth:`list_tax_registrations`
-    * :py:meth:`set_alternate_contacts`
-    * :py:meth:`set_tax_registration`
+    * Account:
+        * :py:meth:`account_status`
+        * :py:meth:`close_account`
+
+    * Alternate Contacts:
+        * :py:meth:`list_alternate_contacts`
+        * :py:meth:`set_alternate_contacts`
+
+    * Tax Registrations:
+        * :py:meth:`list_tax_registrations`
+        * :py:meth:`set_tax_registration`
+        * :py:meth:`delete_tax_registration`
     """
 
     def __init__(self, session):
-        self.session = session
-        self.xsrf_token = self._xsrf_token()
-
+        super().__init__(session)
+        self.__xsrf_token = None
 
     def _xsrf_token(self):
-        r = self.session._get(
+        if self.__xsrf_token is None:
+            self.__xsrf_token = self._get_xsrf_token()
+
+        return self.__xsrf_token
+
+    def _get_xsrf_token(self):
+        r = self.session()._get(
             'https://console.aws.amazon.com/billing/home?region=eu-central-1&state=hashArgs%23'
         )
 
@@ -36,34 +49,40 @@ class Billing:
 
         return r.headers['x-awsbc-xsrf-token']
 
-
     def _get(self, api):
-        r = self.session._get(
+        r = self.session()._get(
             "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
             format(api),
-            headers={'x-awsbc-xsrf-token': self.xsrf_token})
+            headers={'x-awsbc-xsrf-token': self._xsrf_token()})
 
         if r.status_code != 200:
             raise Exception("failed get {0}".format(api))
 
         return r
 
-
-    def _put(self, api, data):
-        r = self.session._put(
-            "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
-            format(api),
-            headers={
-                'x-awsbc-xsrf-token': self.xsrf_token,
-                'Content-Type': 'application/json',
-            },
-            data=json.dumps(data))
+    def _put(self, api, data=None):
+        if data is None:
+            r = self.session()._put(
+                "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+                format(api),
+                headers={
+                    'x-awsbc-xsrf-token': self._xsrf_token(),
+                    'Content-Type': 'application/json',
+                })
+        else:
+            r = self.session()._put(
+                "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+                format(api),
+                headers={
+                    'x-awsbc-xsrf-token': self._xsrf_token(),
+                    'Content-Type': 'application/json',
+                },
+                data=json.dumps(data))
 
         if r.status_code != 200:
-            raise Exception("failed put {0}".format(api))
+            raise Exception("failed put {}: {}".format(api, r.text))
 
         return r
-
 
     # billing api
 
@@ -97,7 +116,6 @@ class Billing:
         r = self._get('additionalcontacts')
         return json.loads(r.text)
 
-
     def set_alternate_contacts(self, AlternateContacts):
         """
         Sets the alternate contacts set for the account. In order to keep the
@@ -124,7 +142,7 @@ class Billing:
             .. code-block:: python
 
                 response = client.set_alternate_contacts(
-                    AlternateContacts = [
+                    AlternateContacts=[
                         {
                             'contactType': 'billing',
                             'email': str,
@@ -148,11 +166,11 @@ class Billing:
                         },
                     ]
                 )
+
         Args:
             AlternateContacts (list): List of alternate contacts.
         """
         self._put('additionalcontacts', AlternateContacts)
-
 
     def list_tax_registrations(self):
         """
@@ -203,7 +221,6 @@ class Billing:
         r = self._get('taxexemption/eu/vat/information')
         return json.loads(r.text)['taxRegistrationList']
 
-
     def set_tax_registration(self, TaxRegistration):
         """
         Set the tax registrations for the account.
@@ -215,7 +232,7 @@ class Billing:
             .. code-block:: python
 
                 response = client.set_tax_registration(
-                    TaxRegistration = {
+                    TaxRegistration={
                         'address': {
                             'addressLine1': str,
                             'addressLine2': str,
@@ -239,7 +256,6 @@ class Billing:
         """
         self._put('taxexemption/eu/vat/information', TaxRegistration)
 
-
     def delete_tax_registration(self, TaxRegistration):
         """
         Delete the given tax registrations from the account.
@@ -248,7 +264,7 @@ class Billing:
             .. code-block:: python
 
                 response = client.delete_tax_registration(
-                    TaxRegistration = {
+                    TaxRegistration={
                         'address': {
                             'addressLine1': str,
                             'addressLine2': str,
@@ -272,3 +288,40 @@ class Billing:
         """
         TaxRegistration['currentStatus'] = 'Deleted'
         return self.set_tax_registration(TaxRegistration)
+
+    def account_status(self):
+        """
+        Obtain the status of the account.
+
+        Status:
+            ``ACTIVE``:
+                Active
+            ``SUSPENDED``:
+                Suspended, will be deleted within 90 days
+
+        Request Syntax:
+            .. code-block:: python
+
+                response = client.account_status()
+
+        Returns:
+            string: status
+        """
+        r = self._get('account/status')
+        return json.loads(r.text)
+
+    def close_account(self):
+        """
+        Close the account. Returns True iff successful, otherwise throws
+        an exception.
+
+        Request Syntax:
+            .. code-block:: python
+
+                client.close_account()
+        
+        Returns:
+            boolean: success
+        """
+        self._put('account')
+        return True

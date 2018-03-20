@@ -1,27 +1,22 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 requests = "*"
 furl = "*"
 ansicolors = "*"
 "beautifulsoup4" = "*"
 pyotp = "*"
 
-
 [dev-packages]
-
 ipython = "*"
 pylint = "*"
 yapf = "*"
 sphinx = "*"
-guzzle-sphinx-theme = "*"
 requests-mock = "*"
 nose = "*"
 twine = "*"
 wheel = "*"
+guzzle-sphinx-theme = "*"
