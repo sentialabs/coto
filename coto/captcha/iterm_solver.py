@@ -41,6 +41,3 @@ class iTermSolver:
 
     def incorrect(self, job_id):
         print("You guessed wrong!")
-
-    def _show_and_guess(self, job_id, base64):
-        pass
