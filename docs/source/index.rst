@@ -14,16 +14,14 @@ User Guide
    guide/index
 
 
+
 API Reference
 -------------
-
-Services
-~~~~~~~~
 
 .. toctree::
    :maxdepth: 3
 
-   reference/services/index
+   reference/index
 
 
 Indices and tables

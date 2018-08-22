@@ -23,11 +23,11 @@ For example when creating a new account in an AWS Organization, there are some t
 ### Login using a boto session.
 
 ```python
-import boto
+import boto3
 import coto
 
 session = coto.Session(
-    boto_session = boto.Session()
+    boto3_session=boto3.Session()
 )
 ```
 
@@ -38,8 +38,8 @@ session = coto.Session(
 import coto
 
 session = coto.Session(
-    email = 'email@example.com',
-    password = 's3cur3 p4ssw0rd!'
+    email='email@example.com',
+    password='s3cur3 p4ssw0rd!'
 )
 ```
 
@@ -50,9 +50,9 @@ session = coto.Session(
 import coto
 
 session = coto.Session(
-    email = 'email@example.com',
-    password = 's3cur3 p4ssw0rd!',
-    mfa_secret = 'MFAxSECRETxSEEDxXXXXXXXXXXXXXXXXXX'
+    email='email@example.com',
+    password='s3cur3 p4ssw0rd!',
+    mfa_secret='MFAxSECRETxSEEDxXXXXXXXXXXXXXXXXXX'
 )
 ```
 
@@ -70,7 +70,7 @@ iam.get_account_info()
 ```python
 billing = session.client('billing')
 billing.set_tax_registration(
-    {
+    TaxRegistration={
         'address': {
             'addressLine1': 'Adresweg 1',
             'addressLine2': None,

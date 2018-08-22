@@ -1,6 +1,6 @@
 Billing
 =======
 
-.. autoclass:: coto.clients.Billing
+.. autoclass:: coto.clients.billing.Client
    :members:
    :undoc-members:
