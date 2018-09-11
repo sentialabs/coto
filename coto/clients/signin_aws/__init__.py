@@ -14,7 +14,7 @@ def captcha_decorator(func):
         captcha_guess = kwargs.get('captcha_guess')
         solver = self.session()._captcha_solver
         guess_uuid = None
-        
+
         while True:
             try:
                 _kwargs = {k: v for k, v in kwargs.items()}
@@ -24,10 +24,10 @@ def captcha_decorator(func):
             except exceptions.CaptchaRequiredException as e:
                 if solver is None:
                     raise
-                
+
                 if guess_uuid and captcha_guess and captcha_guess.action == e.action:
                     solver.incorrect(guess_uuid)
-                
+
                 guess_uuid = solver.solve(url=e.CaptchaURL)
 
                 while True:
@@ -102,7 +102,8 @@ class Client(BaseClient):
 
         if captcha_guess and captcha_guess.action == action:
             data['captcha_token'] = captcha_guess.captcha_token
-            data['captchaObfuscationToken'] = captcha_guess.captchaObfuscationToken
+            data['captchaObfuscationToken'] = \
+                captcha_guess.captchaObfuscationToken
             data['captcha_guess'] = captcha_guess.guess
 
         r = self.session()._post(
@@ -117,17 +118,16 @@ class Client(BaseClient):
         state = out.get('state', 'none').lower()
         properties = out.get('properties', {})
 
-        if properties.get('Captcha', 'false') == 'true':
+        if properties.get('Captcha',
+                          'false') == 'true' and action != "captcha":
             raise exceptions.CaptchaRequiredException(
-                properties['CES'],
-                properties['CaptchaURL'],
-                properties['captchaObfuscationToken'],
-                action
-            )
+                properties['CES'], properties['CaptchaURL'],
+                properties['captchaObfuscationToken'], action)
 
         if state != 'success':
             if 'Message' in properties:
-                raise Exception("failed action {}: {}".format(action, properties['Message']))
+                raise Exception("failed action {}: {}".format(
+                    action, properties['Message']))
             else:
                 raise Exception("failed action {}: {}".format(action, r.text))
 
@@ -157,7 +157,9 @@ class Client(BaseClient):
         Returns:
             str: Account type
         """
-        response = self._action('resolveAccountType', {'email': email}, captcha_guess=captcha_guess)
+        response = self._action(
+            'resolveAccountType', {'email': email},
+            captcha_guess=captcha_guess)
         return response['resolvedAccountType']
 
     def mfa_required(self, email):
@@ -183,7 +185,11 @@ class Client(BaseClient):
         return self.signin_decoupled(email, password, mfa_secret)
 
     @captcha_decorator
-    def signin_decoupled(self, email, password, mfa_secret=None, captcha_guess=None):
+    def signin_decoupled(self,
+                         email,
+                         password,
+                         mfa_secret=None,
+                         captcha_guess=None):
         """
         Signin into the AWS Management Console using account root user.
 
@@ -242,6 +248,16 @@ class Client(BaseClient):
         """
         return self._action('captcha', {'forgotpassword': True})
 
+    def raise_password_recovery_captcha(self):
+        """
+        Obtains a captcha for password recovery and raises a
+        CaptchaRequiredException.
+        """
+        captcha = self.get_password_recovery_captcha()
+        raise exceptions.CaptchaRequiredException(
+            captcha['CES'], captcha['CaptchaURL'],
+            captcha['captchaObfuscationToken'], 'getResetPasswordToken')
+
     @captcha_decorator
     def get_reset_password_token(self, email, captcha_guess=None):
         """
@@ -260,8 +276,16 @@ class Client(BaseClient):
                     'recovery_result': 'email_sent'
                 }
         """
-        return self._action(
-            'getResetPasswordToken',
-            {'email': email},
-            captcha_guess=captcha_guess
-        )
+
+        if not captcha_guess:
+            self.raise_password_recovery_captcha()
+
+        try:
+            return self._action(
+                'getResetPasswordToken', {'email': email},
+                captcha_guess=captcha_guess)
+        except Exception as e:
+            if str(
+                    e
+            ) == "failed action getResetPasswordToken: Enter the characters and try again":
+                self.raise_password_recovery_captcha()
