@@ -87,7 +87,7 @@ class Client(BaseClient):
                 guess = self.session()._captcha_solver.result(guess_uuid)
 
                 if guess is None:
-                    time.sleep(1)
+                    time.sleep(5)
                 else:
                     data["guess"] = guess
                     break

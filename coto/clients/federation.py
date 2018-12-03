@@ -1,6 +1,6 @@
 from furl import furl
 import json
-import requests
+from botocore.vendored import requests
 from . import BaseClient
 
 

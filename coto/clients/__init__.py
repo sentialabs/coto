@@ -12,6 +12,7 @@ from . import account
 from . import federation
 from . import iam
 from . import mfa
+from . import support
 from . import resetpassword
 from . import signin
 from . import signin_amazon
