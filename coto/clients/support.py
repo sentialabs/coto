@@ -22,8 +22,8 @@ class Client(BaseClient):
 
     These are the available methods:
 
-    * :py:meth:`get_support_plan`
-    * :py:meth:`update_support_plan`
+    * :py:meth:`get_support_level`
+    * :py:meth:`update_support_level`
     """
     def __init__(self, session):
         super().__init__(session)
@@ -81,15 +81,15 @@ class Client(BaseClient):
 
         return json.loads(r.text)
 
-    def get_support_plan(self):
+    def get_support_level(self):
         r = self._post('describeSupportLevelSummary', { "lang": "en" })
         return {
             'supportLevel': r['response']['supportLevel'],
             'canChange': r['response']['canChange']
         }
 
-    def update_support_plan(self, support_plan):
-        r = self._post('updateSupportLevel', { "supportLevel": support_plan })
+    def update_support_level(self, support_level):
+        r = self._post('updateSupportLevel', { "supportLevel": support_level })
         return {
             'supportLevel': r['response']['supportLevel']
         }
