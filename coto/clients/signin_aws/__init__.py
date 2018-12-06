@@ -34,7 +34,7 @@ def captcha_decorator(func):
                     guess = solver.result(guess_uuid)
 
                     if guess is None:
-                        time.sleep(1)
+                        time.sleep(5)
                     else:
                         break
                 captcha_guess = e.guess(guess)
@@ -166,12 +166,14 @@ class Client(BaseClient):
         mfa_client = self.session().client('mfa')
         mfa = mfa_client.get_mfa_status(email)
         if 'mfaType' in mfa:
-            if mfa['mfaType'] != 'SW':
-                raise Exception("cannot handle hardware mfa tokens")
+            if mfa['mfaType'] == 'NONE':
+                return False
+            else:
+                return True
 
             return True
 
-        return False
+        return True
 
     def signin(self, email, password, mfa_secret=None):
         # check mfa

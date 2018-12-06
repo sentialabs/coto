@@ -1,4 +1,4 @@
-import requests
+from botocore.vendored import requests
 import json
 from urllib.parse import unquote
 from colors import color
@@ -11,8 +11,6 @@ def dr(r):
             fg = 'green'
         else:
             fg = 'red'
-
-        print()
 
         print(
             color(
@@ -128,6 +126,7 @@ class Session:
 
     def _post(self, url, **kwargs):
         self._set_defaults(kwargs)
+
         r = self.session.post(url, **kwargs)
         if self.debug:
             dr(r)
