@@ -9,6 +9,7 @@ furl = "*"
 ansicolors = "*"
 "beautifulsoup4" = "*"
 pyotp = "*"
+botocore = "*"
 
 [dev-packages]
 ipython = "*"
