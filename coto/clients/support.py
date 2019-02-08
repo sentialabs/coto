@@ -11,7 +11,7 @@ class ReauthException(Exception):
 
 class Client(BaseClient):
     """
-    A low-level client representing Account:
+    A low-level client representing Support:
 
     .. code-block:: python
 
@@ -82,6 +82,24 @@ class Client(BaseClient):
         return json.loads(r.text)
 
     def get_support_level(self):
+        """
+        Lists the current support contract level for the account.
+
+        Request Syntax:
+            .. code-block:: python
+
+                response = client.get_support_level()
+
+        Returns:
+            dict: Response Syntax
+
+            .. code-block:: python
+
+                {
+                    'supportLevel': str,
+                    'canChange': bool
+                }
+        """
         r = self._post('describeSupportLevelSummary', { "lang": "en" })
         return {
             'supportLevel': r['response']['supportLevel'],
@@ -89,6 +107,28 @@ class Client(BaseClient):
         }
 
     def update_support_level(self, support_level):
+        """
+        Change the support contract level for the account.
+
+        Request Syntax:
+            .. code-block:: python
+
+                response = client.set_tax_registration(
+                    support_level=str,
+                )
+
+        Args:
+            support_level (str): Desired support contract level.
+
+        Returns:
+            dict: Response Syntax
+
+            .. code-block:: python
+
+                {
+                    'supportLevel': str
+                }
+        """
         r = self._post('updateSupportLevel', { "supportLevel": support_level })
         return {
             'supportLevel': r['response']['supportLevel']
