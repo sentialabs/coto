@@ -65,6 +65,11 @@ class Client(BaseClient):
 
         form = soup.find(id="ap_signin_form")
 
+        if not form:
+            mfa_form = soup.find(id="auth-mfa-form")
+            if mfa_form:
+                raise Exception("accounts with Amazon MFA not supported")
+
         data = {'metadata1': self.session()._metadata1_generator.generate()}
 
         for field in form.find_all('input'):
