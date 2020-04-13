@@ -222,6 +222,9 @@ class Client(BaseClient):
 
         if mfa_secret is not None:
             data['mfa1'] = TOTP(mfa_secret).now()
+            data['metadata1'] = self.session()._metadata1_generator.generate()
+            data['mfaType'] = 'OTP'
+
 
         # an exception is thrown if authentication was unsuccessful
         self._action('authenticateRoot', data, captcha_guess=captcha_guess)
