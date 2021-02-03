@@ -6,14 +6,14 @@ setup(
     description = "Undocumented AWS Mananagement Console API Client",
     long_description_content_type='text/x-rst',
     long_description = """
-        Some things don not have a documented API but can be set using the
+        Some things do not have a documented API but can be set using the
         AWS Mananagement Console. Using this client we access the undocumented
         REST APIs that power the AWS Management Console.
     """,
     author = "Sentia MPC B.V.",
     author_email = "info@sentia.com",
     license = "Apache",
-    version = "0.2.2",
+    version = "0.2.3",
     packages = find_packages(),
     install_requires = [
         'requests',
