@@ -1,5 +1,5 @@
-requests
-furl
-ansicolors
-beautifulsoup4
-pyotp
+requests==2.25.1
+furl==2.1.0
+ansicolors==1.1.8
+beautifulsoup4==4.9.3
+pyotp==2.5.1
