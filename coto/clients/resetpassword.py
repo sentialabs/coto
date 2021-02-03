@@ -55,8 +55,6 @@ class Client(BaseClient):
         # data['redirect_uri'] = self._REDIRECT_URL
         data['csrf'] = self._csrf_token()
 
-        print(data)
-
         r = self.session()._post(
             "https://signin.aws.amazon.com/{0}".format(api),
             data=data,
