@@ -40,7 +40,7 @@ class Client(BaseClient):
         self.__xsrf_token = None
 
     def _url(self, api):
-        return "https://console.aws.amazon.com/iam/service/{0}".format(api)
+        return "https://console.aws.amazon.com/iam/{0}".format(api)
 
     def _xsrf_token(self):
         if self.__xsrf_token is None:
@@ -189,7 +189,7 @@ class Client(BaseClient):
                     }
                 }
         """
-        return self._get('account')
+        return self._get('service/account')
 
     def list_root_mfa_devices(self):
         """
@@ -213,7 +213,7 @@ class Client(BaseClient):
                     'truncated': bool
                 }
         """
-        r = self._get('root/mfa/')
+        r = self._get('api/mfa')
         return r
 
     def create_virtual_mfa_device(
@@ -260,9 +260,9 @@ class Client(BaseClient):
             **base32StringSeed** (*str*) -- The Base32 seed defined as specified
             in RFC3548 . The Base32StringSeed is Base64-encoded.
         """
-        r = self._post('mfa/createVirtualMfa', {
+        r = self._post('api/mfa/createVirtualMfa', {
             'path': Path,
-            'deviceName': VirtualMFADeviceName
+            'virtualMFADeviceName': VirtualMFADeviceName
         })
         return r
 
@@ -312,8 +312,6 @@ class Client(BaseClient):
                 device. The format for this parameter is a string of 6 digits.
                 If ``Base32StringSeed`` is set, it wil override this argument.
 
-        Returns:
-            bool: success
         """
         if Base32StringSeed:
             current = datetime.now()
@@ -323,11 +321,13 @@ class Client(BaseClient):
             AuthenticationCode2 = totp.at(current)
 
         r = self._post(
-            'root/mfa/associate', {
-                'serial': SerialNumber,
-                'codes': [AuthenticationCode1, AuthenticationCode2]
+            'api/mfa/enableMfaDevice', {
+                'userName': '',
+                'serialNumber': SerialNumber,
+                'authenticationCode1': AuthenticationCode1, 
+                'authenticationCode2': AuthenticationCode2
             })
-        return r['success']
+        return r
 
     def deactivate_root_mfa_device(self, SerialNumber):
         """
@@ -346,27 +346,7 @@ class Client(BaseClient):
                 MFA device. For virtual MFA devices, the serial number is the
                 device ARN.
         """
-        r = self._post('root/mfa/disassociate', {'serial': SerialNumber})
-        return r
-
-    def delete_virtual_mfa_device(self, SerialNumber):
-        """
-        Deletes the specified virtual MFA device.
-
-        Request Syntax:
-            .. code-block:: python
-
-                response = client.delete_virtual_mfa_device(
-                    SerialNumber=str
-                )
-
-        Args:
-            SerialNumber (str): The serial number that uniquely identifies the
-                MFA device. For virtual MFA devices, the serial number is the
-                device ARN.
-        """
-        r = self._http('delete', 'proxy/DeleteVirtualMFADevice',
-                       {'serialNumber': SerialNumber})
+        r = self._post('api/mfa/deactivateMfaDevice', {'serialNumber': SerialNumber, 'userName': ''})
         return r
 
     def list_root_access_keys(self, Deleted=False):
@@ -402,9 +382,9 @@ class Client(BaseClient):
                 ]
         """
         if Deleted:
-            r = self._get('root/keys/?deleted=1')
+            r = self._get('service/root/keys/?deleted=1')
         else:
-            r = self._get('root/keys')
+            r = self._get('service/root/keys')
         return r
 
     def create_root_access_key(self):
@@ -430,7 +410,7 @@ class Client(BaseClient):
                     "deleteDate": int
                 }
         """
-        r = self._post('root/keys')
+        r = self._post('service/root/keys')
         return r
 
     def update_root_access_key(self, AccessKeyId, Status='Inactive'):
@@ -458,9 +438,9 @@ class Client(BaseClient):
             bool: success
         """
         if Status.lower() == 'active':
-            r = self._http('activate', "root/keys/{0}".format(AccessKeyId))
+            r = self._http('service/activate', "root/keys/{0}".format(AccessKeyId))
         else:
-            r = self._http('deactivate', "root/keys/{0}".format(AccessKeyId))
+            r = self._http('service/deactivate', "root/keys/{0}".format(AccessKeyId))
         return r['success']
 
     def delete_root_access_key(self, AccessKeyId):
@@ -481,5 +461,5 @@ class Client(BaseClient):
         Returns:
             bool: success
         """
-        r = self._http('delete', "root/keys/{0}".format(AccessKeyId))
+        r = self._http('delete', "service/root/keys/{0}".format(AccessKeyId))
         return r['success']
