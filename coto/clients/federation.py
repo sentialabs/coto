@@ -3,6 +3,11 @@ import json
 import requests
 from . import BaseClient
 
+import os
+
+FEDERATION_SIGNIN_URL = os.environ.get('FEDERATION_SIGNIN_URL', 'https://signin.aws.amazon.com/federation')
+FEDERATION_DESTINATION = os.environ.get('FEDERATION_DESTINATION', 'https://console.aws.amazon.com/')
+
 
 class Client(BaseClient):
     REQUIRES_AUTHENTICATION = False
@@ -87,11 +92,11 @@ class Client(BaseClient):
         Returns:
             bool: Signin succeeded.
         """
-        url = furl('https://signin.aws.amazon.com/federation')
+        url = furl(FEDERATION_SIGNIN_URL)
 
         url.args['Action'] = "login"
         url.args['Issuer'] = None
-        url.args['Destination'] = "https://console.aws.amazon.com/"
+        url.args['Destination'] = FEDERATION_DESTINATION
         url.args['SigninToken'] = self.get_signin_token(boto3_session)
 
         return url.url
@@ -119,7 +124,7 @@ class Client(BaseClient):
         """
         credentials = boto3_session.get_credentials()
 
-        url = "https://signin.aws.amazon.com/federation"
+        url = FEDERATION_SIGNIN_URL
         response = self.session()._get(
             url,
             params={

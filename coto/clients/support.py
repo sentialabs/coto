@@ -4,6 +4,10 @@ from datetime import datetime, timedelta
 import json
 from . import BaseClient
 
+import os
+
+SUPPORT_URL = os.environ.get('SUPPORT_URL', 'https://console.aws.amazon.com/support/')
+SUPPORT_REGION = os.environ.get('SUPPORT_REGION', 'eu-central-1')
 
 class ReauthException(Exception):
     pass
@@ -30,7 +34,7 @@ class Client(BaseClient):
         self.__xsrf_token = None
 
     def _url(self, api):
-        return "https://console.aws.amazon.com/support/plans/service/{0}?state=hashArgs%23".format(api)
+        return SUPPORT_URL + "plans/service/{0}?state=hashArgs%23".format(api)
 
     def _xsrf_token(self):
         if self.__xsrf_token is None:
@@ -40,7 +44,7 @@ class Client(BaseClient):
 
     def _get_xsrf_token(self):
         r = self.session()._get(
-            'https://console.aws.amazon.com/support/plans/home?region=eu-central-1&state=hashArgs%23'
+            SUPPORT_URL + 'plans/home?region=' + SUPPORT_REGION + '&state=hashArgs%23'
         )
         
         if r.status_code != 200:

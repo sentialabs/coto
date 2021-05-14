@@ -4,10 +4,15 @@ from urllib import parse
 import json
 from . import BaseClient
 
+import os
+
+RESET_PASSWORD_CONSOLE_URL = os.environ.get('RESET_PASSWORD_CONSOLE_URL', 'https://console.aws.amazon.com/console/')
+RESET_PASSWORD_SIGNIN_URL = os.environ.get('RESET_PASSWORD_SIGNIN_URL', 'https://signin.aws.amazon.com/resetpassword')
+RESET_PASSWORD_AWS_SIGNIN_URL = os.environ.get('RESET_PASSWORD_SIGNIN_URL', 'https://signin.aws.amazon.com/')
 
 class Client(BaseClient):
     REQUIRES_AUTHENTICATION = False
-    _REDIRECT_URL = "https://console.aws.amazon.com/console/home?state=hashArgs%23&isauthcode=true"
+    _REDIRECT_URL = RESET_PASSWORD_CONSOLE_URL + "home?state=hashArgs%23&isauthcode=true"
 
     def __init__(self, session):
         super().__init__(session)
@@ -21,7 +26,7 @@ class Client(BaseClient):
 
     def _get_tokens(self):
         r = self.session()._get(
-            'https://signin.aws.amazon.com/resetpassword'
+            RESET_PASSWORD_SIGNIN_URL
         )
 
         if r.status_code != 200:
@@ -56,7 +61,7 @@ class Client(BaseClient):
         data['csrf'] = self._csrf_token()
 
         r = self.session()._post(
-            "https://signin.aws.amazon.com/{0}".format(api),
+            RESET_PASSWORD_AWS_SIGNIN_URL + "{0}".format(api),
             data=data,
         )
 

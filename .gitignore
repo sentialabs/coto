@@ -2,6 +2,7 @@ __pycache__
 *.swp
 *.egg-info
 .env
+.envrc
 /.vscode
 /docs/build
 /build
