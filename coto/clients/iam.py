@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 import json
 from . import BaseClient
 
+import os
+
+IAM_ENDPOINT_URL = os.environ.get('IAM_ENDPOINT_URL', 'https://console.aws.amazon.com/iam/')
 
 class Client(BaseClient):
     """
@@ -40,7 +43,7 @@ class Client(BaseClient):
         self.__xsrf_token = None
 
     def _url(self, api):
-        return "https://console.aws.amazon.com/iam/{0}".format(api)
+        return IAM_ENDPOINT_URL + "{0}".format(api)
 
     def _xsrf_token(self):
         if self.__xsrf_token is None:
@@ -50,12 +53,12 @@ class Client(BaseClient):
 
     def _get_xsrf_token(self):
         r = self.session()._get(
-            'https://console.aws.amazon.com/iam/home?&state=hashArgs%23')
+            IAM_ENDPOINT_URL + 'home?&state=hashArgs%23')
 
         if r.status_code != 200:
             raise Exception("failed get token")
 
-        r = self.session()._get('https://console.aws.amazon.com/iam/home?')
+        r = self.session()._get(IAM_ENDPOINT_URL + 'home?')
 
         if r.status_code != 200:
             raise Exception("failed get token")

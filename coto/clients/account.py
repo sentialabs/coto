@@ -4,6 +4,10 @@ from datetime import datetime, timedelta
 import json
 from . import BaseClient
 
+import os
+
+ACCOUNT_CONSOLE_URL = os.environ.get('ACCOUNT_CONSOLE_URL', 'https://console.aws.amazon.com/console/')
+ACCOUNT_SIGNIN_URL = os.environ.get('ACCOUNT_SIGNIN_URL', 'https://signin.aws.amazon.com/updateaccount')
 
 class ReauthException(Exception):
     pass
@@ -27,7 +31,7 @@ class Client(BaseClient):
     * :py:meth:`update_account_email`
     * :py:meth:`update_account_password`
     """
-    _REDIRECT_URL = "https://console.aws.amazon.com/console/home?state=hashArgs%23&isauthcode=true"
+    _REDIRECT_URL = ACCOUNT_CONSOLE_URL + "home?state=hashArgs%23&isauthcode=true"
 
     def __init__(self, session):
         super().__init__(session)
@@ -41,7 +45,7 @@ class Client(BaseClient):
 
     def _get_tokens(self):
         r = self.session()._get(
-            'https://signin.aws.amazon.com/updateaccount?redirect_uri=https%3A%2F%2Fconsole.aws.amazon.com%2Fbilling%2Fhome%23%2Faccount'
+            ACCOUNT_SIGNIN_URL + '?redirect_uri=https%3A%2F%2Fconsole.aws.amazon.com%2Fbilling%2Fhome%23%2Faccount'
         )
 
         if r.status_code != 200:
@@ -77,7 +81,7 @@ class Client(BaseClient):
         data['csrf'] = self._csrf_token()
 
         r = self.session()._post(
-            'https://signin.aws.amazon.com/updateaccount',
+            ACCOUNT_SIGNIN_URL,
             data=data,
         )
 

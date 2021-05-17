@@ -3,10 +3,14 @@ from pyotp import TOTP
 import json
 from . import BaseClient
 
+import os
+
+MFA_CONSOLE_URL = os.environ.get('MFA_CONSOLE_URL', 'https://console.aws.amazon.com/console/')
+MFA_SIGNIN_URL = os.environ.get('MFA_SIGNIN_URL', 'https://signin.aws.amazon.com/mfa')
 
 class Client(BaseClient):
     REQUIRES_AUTHENTICATION = False
-    _REDIRECT_URL = "https://console.aws.amazon.com/console/home?state=hashArgs%23&isauthcode=true"
+    _REDIRECT_URL = MFA_CONSOLE_URL + "home?state=hashArgs%23&isauthcode=true"
 
     def __init__(self, session):
         super().__init__(session)
@@ -14,7 +18,7 @@ class Client(BaseClient):
 
     def get_mfa_status(self, email):
         r = self.session()._post(
-            "https://signin.aws.amazon.com/mfa",
+            MFA_SIGNIN_URL,
             data={
                 'email': email,
                 '_redirect_url': self._REDIRECT_URL,

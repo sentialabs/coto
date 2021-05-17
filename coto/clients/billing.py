@@ -1,6 +1,11 @@
 import json
 from . import BaseClient
 
+import os
+
+BILLING_CONSOLE_URL = os.environ.get('BILLING_CONSOLE_URL', 'https://console.aws.amazon.com/billing/')
+BILLING_REGION = os.environ.get('BILLING_REGION', 'eu-central-1')
+
 
 class Client(BaseClient):
     """
@@ -41,7 +46,7 @@ class Client(BaseClient):
 
     def _get_xsrf_token(self):
         r = self.session()._get(
-            'https://console.aws.amazon.com/billing/home?region=eu-central-1&state=hashArgs%23'
+            BILLING_CONSOLE_URL + 'home?region=' + BILLING_REGION + '&state=hashArgs%23'
         )
 
         if r.status_code != 200:
@@ -51,7 +56,7 @@ class Client(BaseClient):
 
     def _get(self, api):
         r = self.session()._get(
-            "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+            BILLING_CONSOLE_URL + "rest/v1.0/{0}?state=hashArgs%23".
             format(api),
             headers={'x-awsbc-xsrf-token': self._xsrf_token()})
 
@@ -63,7 +68,7 @@ class Client(BaseClient):
     def _put(self, api, data=None):
         if data is None:
             r = self.session()._put(
-                "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+                BILLING_CONSOLE_URL + "rest/v1.0/{0}?state=hashArgs%23".
                 format(api),
                 headers={
                     'x-awsbc-xsrf-token': self._xsrf_token(),
@@ -71,7 +76,7 @@ class Client(BaseClient):
                 })
         else:
             r = self.session()._put(
-                "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+                BILLING_CONSOLE_URL + "rest/v1.0/{0}?state=hashArgs%23".
                 format(api),
                 headers={
                     'x-awsbc-xsrf-token': self._xsrf_token(),
