@@ -17,8 +17,8 @@ from furl import furl
 #         f.write(html)
 #     webbrowser.open(url)
 
-def ap_url(email):
-    url = furl("https://www.amazon.com/ap/signin")
+def ap_url(email, path='signin'):
+    url = furl(f"https://www.amazon.com/ap/{path}")
 
     url.args["openid.assoc_handle"] = "aws"
     url.args["openid.return_to"] = "https://signin.aws.amazon.com/oauth?coupled_root=true&response_type=code&redirect_uri=https%3A%2F%2Fconsole.aws.amazon.com%2Fconsole%2Fhome%3Fstate%3DhashArgs%2523%26isauthcode%3Dtrue&client_id=arn%3Aaws%3Aiam%3A%3A015428540659%3Auser%2Fhomepage"
