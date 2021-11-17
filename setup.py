@@ -13,7 +13,7 @@ setup(
     author = "Sentia MPC B.V.",
     author_email = "info@sentia.com",
     license = "Apache",
-    version = "0.2.4",
+    version = "0.3.0",
     packages = find_packages(),
     install_requires = [
         'requests',
