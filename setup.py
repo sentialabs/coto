@@ -21,6 +21,7 @@ setup(
         'ansicolors',
         'beautifulsoup4',
         'pyotp',
+        'Pillow'
     ],
     classifiers=[
         # How mature is this project? Common values are
