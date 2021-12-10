@@ -1,3 +1,4 @@
+from io import BytesIO
 from bs4 import BeautifulSoup
 from pyotp import TOTP
 from urllib import parse
@@ -5,6 +6,10 @@ import json
 from . import BaseClient
 from .signin_amazon import ap_url
 import time
+from PIL import Image
+import shutil
+import base64
+import tempfile
 
 
 class Client(BaseClient):
@@ -121,7 +126,12 @@ class Client(BaseClient):
         captcha_page_soup = BeautifulSoup(captcha_page.text, 'html.parser')
         div = captcha_page_soup.find_all('div', class_='cvf-captcha-img')
         solver = self.session()._captcha_solver
-        guess_uuid = solver.solve(url=div[0].img['src'])
+
+        tmp_folder = tempfile.TemporaryDirectory()
+
+        _image = self._get_image(div[0].img['src'], tmp_folder.name)
+        b64_image = self.process_image(_image, tmp_folder.name)
+        guess_uuid = solver.solve(base64=b64_image)
 
         while True:
             guess = solver.result(guess_uuid)
@@ -164,7 +174,45 @@ class Client(BaseClient):
         self.__reset_page = self.session()._get(
             verify.url
         )
+        tmp_folder.cleanup()
         return self.__reset_page
+    
+    def _get_image(self, image_url, tmp_folder) -> Image:
+        r = self.session()._get(image_url, stream = True)
+        tmp_img = f'{tmp_folder}/original'
+
+        # Check if the image was retrieved successfully
+        if r.status_code == 200:
+            # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+            r.raw.decode_content = True
+            
+            # Open a local file with wb ( write binary ) permission.
+            with open(tmp_img,'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+        else:
+            raise IOError('Could not download: %s', image_url)
+
+        return Image.open(tmp_img)
+
+    def process_image(self, imageObject:Image, tmp_folder:str):
+        images = []
+        buffered = BytesIO()
+        if imageObject.format != 'GIF':
+            imageObject.save(fp=buffered, format=imageObject.format.lower())
+        else:
+            for frame in range(0,imageObject.n_frames, 6):
+                imageObject.seek(frame)
+                imageObject.save(f'{tmp_folder}/image_{frame}.gif')
+                images.append(Image.open(f'{tmp_folder}/image_{frame}.gif'))
+
+            gif = images[0]
+            gif.save(fp=buffered, format='gif', save_all=True, append_images=images[1:], duration=250)
+
+        buffered.seek(0)
+        img_byte = buffered.getvalue()
+        img_str = f"data:image/{imageObject.format.lower()};base64," + base64.b64encode(img_byte).decode()
+
+        return img_str
 
     def retrieve_otp_from_email(self, content):
         """
