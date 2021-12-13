@@ -32,7 +32,7 @@ setup(
         'requests==2.25.1',
         'six==1.15.0',
         'soupsieve==2.1',
-        'urllib3==1.26.3',
+        'urllib3==1.26.5',
         'Pillow==8.4.0',
     ],
     classifiers=[
