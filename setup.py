@@ -33,7 +33,7 @@ setup(
         'six==1.15.0',
         'soupsieve==2.1',
         'urllib3==1.26.3',
-        'Pillow==8.4.0',
+        'Pillow==9.0.0',
     ],
     classifiers=[
         # How mature is this project? Common values are
