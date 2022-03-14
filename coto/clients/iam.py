@@ -55,7 +55,7 @@ class Client(BaseClient):
         if r.status_code != 200:
             raise Exception("failed get token")
 
-        r = self.session()._get('https://console.aws.amazon.com/iam/home?')
+        r = self.session()._get('https://console.aws.amazon.com/iam/home?#/security_credentials')
 
         if r.status_code != 200:
             raise Exception("failed get token")
