@@ -41,7 +41,7 @@ class Client(BaseClient):
 
     def _get_xsrf_token(self):
         r = self.session()._get(
-            'https://console.aws.amazon.com/billing/home?region=eu-central-1&state=hashArgs%23'
+            'https://us-east-1.console.aws.amazon.com/billing/home?region=eu-central-1&state=hashArgs%23'
         )
 
         if r.status_code != 200:
@@ -51,7 +51,7 @@ class Client(BaseClient):
 
     def _get(self, api):
         r = self.session()._get(
-            "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+            "https://us-east-1.console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
             format(api),
             headers={'x-awsbc-xsrf-token': self._xsrf_token()})
 
@@ -63,7 +63,7 @@ class Client(BaseClient):
     def _put(self, api, data=None):
         if data is None:
             r = self.session()._put(
-                "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+                "https://us-east-1.console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
                 format(api),
                 headers={
                     'x-awsbc-xsrf-token': self._xsrf_token(),
@@ -71,7 +71,7 @@ class Client(BaseClient):
                 })
         else:
             r = self.session()._put(
-                "https://console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
+                "https://us-east-1.console.aws.amazon.com/billing/rest/v1.0/{0}?state=hashArgs%23".
                 format(api),
                 headers={
                     'x-awsbc-xsrf-token': self._xsrf_token(),
@@ -319,7 +319,7 @@ class Client(BaseClient):
             .. code-block:: python
 
                 client.close_account()
-        
+
         Returns:
             boolean: success
         """
