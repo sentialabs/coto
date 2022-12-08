@@ -19,7 +19,7 @@ setup(
         'appdirs==1.4.4',
         'beautifulsoup4==4.9.3',
         'botocore==1.23.23',
-        'certifi==2020.12.5',
+        'certifi==2022.12.7',
         'chardet==4.0.0',
         'distlib==0.3.1',
         'filelock==3.0.12',
